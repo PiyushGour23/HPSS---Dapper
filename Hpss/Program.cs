@@ -2,6 +2,7 @@ using AutoMapper;
 using Hpss.Data;
 using Hpss.Helper;
 using Hpss.Interface;
+using Hpss.Model;
 using Hpss.Repository;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
@@ -27,7 +28,7 @@ builder.Services.AddCors(p => p.AddDefaultPolicy(build =>
     build.WithOrigins("dfvdfvdf").AllowAnyMethod().AllowAnyHeader();
 }));
 
-
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 //enable single domain
 //multiple domain
 //any domain
@@ -36,6 +37,7 @@ builder.Services.AddCors(p => p.AddDefaultPolicy(build =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddTransient<DapperDbContext>();
 builder.Services.AddTransient<IHpssRepository, HpssRepository>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 var automapper = new MapperConfiguration(item => item.AddProfile(new AutoMapperHandler()));
 IMapper mapper = automapper.CreateMapper();
 builder.Services.AddSingleton(mapper);
@@ -49,6 +51,7 @@ var _logger = new LoggerConfiguration()
     .WriteTo.File(Logpath)
     .CreateLogger();
 builder.Services.AddSerilog(_logger);
+
 
 builder.Services.AddRateLimiter(p => p.AddFixedWindowLimiter(policyName: "FixedWindow", options =>
 {
